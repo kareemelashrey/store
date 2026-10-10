@@ -23,6 +23,7 @@ th{background:var(--pri);color:var(--on);padding:9px 8px;font-size:13px;white-sp
 .login{max-width:360px;margin:12vh auto;padding:0 16px}
 @media print{header,nav,#ov,.noprint{display:none!important}.card{box-shadow:none}body{background:#fff;color:#000}}
 .doc{background:#fff;color:#000;padding:18px;border-radius:12px;max-width:860px;margin:10px auto;box-shadow:var(--sh)}.doc h2{color:#000}.doc .card{background:none;box-shadow:none;padding:0;color:#000}.doc td{color:#000;border-bottom:1px solid #ddd}.doc th{background:#e5e7eb;color:#000}.doc .note{color:#555}
+.ng{font-size:12px;color:var(--mut);margin:12px 4px 2px;font-weight:600}
 </style></head><body>
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -43,7 +44,10 @@ async function boot(){const{data:{session}}=await SB.auth.getSession();if(!sessi
 async function load(){A=null;const[a,b,c,d]=await Promise.all([SB.from('items').select('*').order('code'),SB.from('customers').select('*').order('code'),SB.from('wallets').select('*').order('id'),SB.rpc('get_stock')]);D.items=a.data||[];D.cust=b.data||[];D.wal=c.data||[];D.stock={};(d.data||[]).forEach(x=>D.stock[x.item_id]=n(x.balance))}
 const adm=()=>me&&me.role=='admin';
 function shell(){const T=[['sales','🛒 مبيعات'],['inv','🧾 الفواتير'],['stock','🏬 المخزون'+(low().length?' ⚠️'+low().length:'')],['day','📅 ملخص اليوم']].concat(adm()?[['items','📦 الأصناف'],['cust','👥 العملاء'],['buy','🚚 المشتريات'],['pay','💵 دفعات العملاء'],['ret','↩️ المرتجعات'],['spay','🏭 دفعات الموردين'],['exp','🧾 المصروفات'],['cash','🏦 الخزينة واليومية'],['partners','🤝 الشركاء'],['emps','👷 الموظفين'],['inj','💰 تزويد خارجي'],['ho','📤 التسليم'],['sup','🏭 الموردين'],['wal','👛 المحافظ'],['wd','🔁 سحب المحافظ'],['wt','🔄 تحويل بين المحافظ'],['stt','🏬 المخزن الثاني'],['rep','📊 التقارير'],['log','📜 السجل'],['set','⚙️ الإعدادات'],['bk','💾 نسخة احتياطية']]:[]);
-$('#app').innerHTML=`<header><span><button class="mb" onclick="menu()">☰</button> <b>🧾 حسابات المخزن</b></span><span>${esc(me.name)} · ${adm()?'مدير':'كاشير'} <button onclick="logout()">خروج</button></span></header><div id="ov" onclick="menu()"></div><div class="lay"><nav>${T.map(([k,l])=>`<button class="${k==tab?'on':''}" onclick="go('${k}')">${l}</button>`).join('')}</nav><main id="main"></main></div>`;render()}
+$('#app').innerHTML=`<header><span><button class="mb" onclick="menu()">☰</button> <b>🧾 حسابات المخزن</b> <small style="opacity:.75">${VER}</small></span><span>${esc(me.name)} · ${adm()?'مدير':'كاشير'} <button onclick="logout()">خروج</button></span></header><div id="ov" onclick="menu()"></div><div class="lay"><nav>${navHtml(T)}</nav><main id="main"></main></div>`;render()}
+const VER='نسخة 12';
+const GR=[['العمليات',['sales','inv','day']],['المخزون',['stock','items','buy','ret','stt']],['الخزينة والمحافظ',['cash','inj','ho','exp','wal','wd','wt']],['الحسابات والأشخاص',['cust','pay','sup','spay','partners','emps']],['التقارير والنظام',['rep','log','set','bk']]];
+function navHtml(T){const M=Object.fromEntries(T),used=new Set(),btn=k=>`<button class="${k==tab?'on':''}" onclick="go('${k}')">${M[k]}</button>`;let h='';GR.forEach(([t,ks])=>{const a=ks.filter(k=>M[k]);if(a.length){h+=`<div class="ng">${t}</div>`+a.map(btn).join('');a.forEach(k=>used.add(k))}});T.filter(([k])=>!used.has(k)).forEach(([k])=>h+=btn(k));return h}
 const menu=()=>document.body.classList.toggle('m');
 function go(t){tab=t;if(t!='sales'&&EDIT){EDIT=null;LINES=[{}]}EI=null;EC=null;document.body.classList.remove('m');shell()}
 async function render(){const v={sales:salesView,inv:invView,stock:stockView,items:itemsView,cust:custView}[tab]||ADM[tab]||(()=>crud(tab));if(['sales','stock','day','stt'].includes(tab))await rs();$('#main').innerHTML='<p class="note">جاري التحميل...</p>';$('#main').innerHTML=(adm()&&tab!='bk'&&tab!='pv'?bkBanner():'')+await v()}
