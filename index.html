@@ -101,8 +101,8 @@ if(!p||p.active===false){await SB.auth.signOut();return loginView(p&&p.active===
 try{localStorage.setItem('kp',JSON.stringify(p))}catch(e){}me=p;me.wh=p.warehouse||'main';idle();if(p.role=='admin'){const{data:lb}=await SB.from('settings').select('value').eq('key','last_backup').maybeSingle();LB=lb?lb.value:null}
 await load();tab=(p.role=='admin'||p.role=='supervisor')?'home':'sales';shell();netUi();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});setInterval(()=>{if(me)syncQ()},60000);syncQ()}
 async function load(){A=null;const[a,b,c,d,e,g2]=await Promise.all([SB.from('items').select('*').order('code'),SB.from('customers').select('*').order('code'),SB.from('wallets').select('*').order('id'),SB.rpc('get_stock'),SB.from('settings').select('key,value'),SB.rpc('get_stock2')]);
-if(a.error||b.error||c.error){let k=null;try{k=JSON.parse(localStorage.getItem('kd')||'null')}catch(x){}if(k){D.items=k.items;D.cust=k.cust;D.wal=k.wal;D.stock=k.stock;D.stock2=k.stock2||{};D.cfg=k.cfg||{};D.canDisc=D.cfg.cashier_can_discount===true;return}}
-D.items=a.data||[];D.cust=b.data||[];D.wal=c.data||[];D.stock={};(d.data||[]).forEach(x=>D.stock[x.item_id]=n(x.balance));D.stock2={};((g2&&g2.data)||[]).forEach(x=>D.stock2[x.item_id]=n(x.balance));D.cfg=Object.fromEntries((e.data||[]).map(x=>[x.key,x.value]));D.canDisc=D.cfg.cashier_can_discount===true;
+if(a.error||b.error||c.error){let k=null;try{k=JSON.parse(localStorage.getItem('kd')||'null')}catch(x){}if(k){D.items=k.items;D.cust=k.cust;D.wal=k.wal;D.stock=k.stock;D.stock2=k.stock2||{};D.cfg=k.cfg||{};D.canDisc=D.cfg.cashier_can_discount===true;applyColors();return}}
+D.items=a.data||[];D.cust=b.data||[];D.wal=c.data||[];D.stock={};(d.data||[]).forEach(x=>D.stock[x.item_id]=n(x.balance));D.stock2={};((g2&&g2.data)||[]).forEach(x=>D.stock2[x.item_id]=n(x.balance));D.cfg=Object.fromEntries((e.data||[]).map(x=>[x.key,x.value]));D.canDisc=D.cfg.cashier_can_discount===true;applyColors();
 try{localStorage.setItem('kd',JSON.stringify({items:D.items,cust:D.cust,wal:D.wal,stock:D.stock,stock2:D.stock2,cfg:D.cfg}))}catch(x){}}
 const adm=()=>me&&me.role=='admin',sup=()=>me&&me.role=='supervisor',mgr=()=>adm()||sup(),SUPX=['users','set','bk','items'],roleLbl=()=>adm()?'مدير':sup()?'مشرف':'كاشير';
 function shell(){const T0=[['sales','🛒 مبيعات'],['inv','🧾 الفواتير'],['stock','🏬 المخزون'+(low().length?' ⚠️'+low().length:'')],['day','📅 ملخص اليوم']].concat(mgr()?[['items','📦 الأصناف'],['cust','👥 العملاء'],['buy','🚚 المشتريات'],['pay','💵 دفعات العملاء'],['ret','↩️ المرتجعات'],['spay','🏭 دفعات الموردين'],['exp','🧾 المصروفات'],['cash','🏦 الخزينة واليومية'],['partners','🤝 الشركاء'],['emps','👷 الموظفين'],['inj','💰 تزويد خارجي'],['ho','📤 التسليم'],['sup','🏭 الموردين'],['wal','👛 المحافظ'],['wd','🔁 سحب المحافظ'],['wt','🔄 تحويل بين المحافظ'],['stt','🏬 المخزن الثاني'],['chq','💳 الشيكات'+(dueChq()?' ⚠️'+dueChq():'')],['rep','📊 التقارير'],['log','📜 السجل'],['set','⚙️ الإعدادات'],['bk','💾 نسخة احتياطية'],['users','👤 المستخدمون']]:[]),T=(mgr()?[['home','الرئيسية'],...T0]:T0).filter(([k])=>!(sup()&&!supOK(k))&&(feat(k)||k=='set'));
@@ -461,13 +461,14 @@ const ADM={ret:retView,buy:buyView,chq:chqView,users:usersView,home:homeView,par
 /* ----- الألوان من داخل البرنامج (محفوظة على الجهاز) ----- */
 const CK=['bg','tx','ac','bad'],CL={bg:'لون الخلفية',tx:'لون الكتابة',ac:'اللون الرئيسي (الأزرار والتحديد)',bad:'لون التنبيهات'};
 const curT=()=>document.documentElement.dataset.theme=='light'?'l':'d';
-function kcol(){try{return JSON.parse(localStorage.getItem('kc_'+curT())||'{}')}catch(e){return{}}}
+function kcol(){return (D.cfg&&D.cfg.colors&&D.cfg.colors[curT()])||{}}
 function applyColors(){const c=kcol(),st=document.documentElement.style;CK.forEach(k=>{if(c[k])st.setProperty('--'+k,c[k]);else st.removeProperty('--'+k)})}
-function setCol(k,v){const c=kcol();c[k]=v;try{localStorage.setItem('kc_'+curT(),JSON.stringify(c))}catch(e){}applyColors();render()}
-function resetCol(){try{localStorage.removeItem('kc_'+curT())}catch(e){}applyColors();render()}
+async function saveColors(all){const{error}=await SB.from('settings').upsert({key:'colors',value:all});if(error)return toast(msg(error),1);D.cfg.colors=all;applyColors();toast('✓ تم حفظ الألوان');render()}
+function setCol(k,v){const all={...((D.cfg&&D.cfg.colors)||{})},t=curT();all[t]={...(all[t]||{}),[k]:v};saveColors(all)}
+function resetCol(){const all={...((D.cfg&&D.cfg.colors)||{})};delete all[curT()];saveColors(all)}
 const hexOf=v=>/^#[0-9a-f]{6}$/i.test((v||'').trim())?v.trim():'#000000';
 function colorsCard(){const cs=getComputedStyle(document.documentElement),c=kcol(),th=curT()=='l'?'الوضع الفاتح':'الوضع الداكن';
-return `<div class="card"><b>🎨 الألوان</b> <span class="note">(${th} — بيتحفظ على الجهاز ده بس)</span><div class="grid" style="margin-top:8px">${CK.map(k=>`<label>${CL[k]}<input type="color" value="${c[k]||hexOf(cs.getPropertyValue('--'+k))}" onchange="setCol('${k}',this.value)" style="height:44px;padding:4px"></label>`).join('')}</div><button class="s" style="margin-top:10px" onclick="resetCol()">استرجاع الألوان الافتراضية</button></div>`}
+return `<div class="card"><b>🎨 الألوان</b> <span class="note">(${th} — بيتطبق على كل الأجهزة)</span><div class="grid" style="margin-top:8px">${CK.map(k=>`<label>${CL[k]}<input type="color" value="${c[k]||hexOf(cs.getPropertyValue('--'+k))}" onchange="setCol('${k}',this.value)" style="height:44px;padding:4px"></label>`).join('')}</div><button class="s" style="margin-top:10px" onclick="resetCol()">استرجاع الألوان الافتراضية</button></div>`}
 
 /* ----- تشغيل وإيقاف الصفحات ----- */
 const feat=k=>!(D.cfg&&D.cfg.features&&D.cfg.features[k]===false);
