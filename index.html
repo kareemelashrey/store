@@ -8,8 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
 <title>Kareem Accounting</title>
 <style>
-:root{--bg:#0B0F1A;--glass:rgba(20,26,44,.72);--card2:rgba(255,255,255,.035);--line:rgba(148,163,255,.14);--tx:#F1F5FF;--mute:#8E9AC0;--ac:#7C6CFF;--acs:rgba(124,108,255,.16);--mint:#34D399;--bad:#F87171;--inp:rgba(255,255,255,.05);--sh:0 18px 44px -22px rgba(0,0,0,.7);--dot:rgba(148,163,255,.06);--fd:'Readex Pro','IBM Plex Sans Arabic',Tahoma,sans-serif;--fb:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;--pri:var(--ac);--pri2:var(--ac);--mut:var(--mute);--bd:var(--line);--card:var(--glass);--on:#fff;--acc:var(--acs);color-scheme:dark}
-:root[data-theme=light]{--bg:#F5F7FC;--glass:rgba(255,255,255,.9);--card2:rgba(30,41,90,.035);--line:rgba(30,41,90,.1);--tx:#111827;--mute:#64748B;--ac:#5B4DF0;--acs:rgba(91,77,240,.1);--mint:#10B981;--bad:#EF4444;--inp:#fff;--sh:0 18px 40px -24px rgba(30,41,90,.22);--dot:rgba(30,41,90,.05);color-scheme:light}
+:root{--bg:#EEF3FA;--glass:#FFFFFF;--card2:#F4F7FC;--line:#D5DEEC;--tx:#14213D;--mute:#5B6B88;--ac:#1F4E9A;--acs:rgba(31,78,154,.10);--mint:#17875A;--bad:#B42318;--inp:#FFFFFF;--sh:0 1px 2px rgba(20,33,61,.06),0 6px 18px -10px rgba(20,33,61,.18);--dot:rgba(31,78,154,.035);--fd:'Readex Pro','IBM Plex Sans Arabic',Tahoma,sans-serif;--fb:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;--pri:var(--ac);--pri2:var(--ac);--mut:var(--mute);--bd:var(--line);--card:var(--glass);--on:#fff;--acc:var(--acs);color-scheme:light}
+:root[data-theme=dark]{--bg:#0F1B2D;--glass:#162540;--card2:#1B2E4D;--line:#2A3D5E;--tx:#E6EDF8;--mute:#9AAACB;--ac:#6FA0F0;--acs:rgba(111,160,240,.14);--mint:#4ADE9A;--bad:#FF8A80;--inp:#1B2E4D;--sh:0 1px 2px rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.5);--dot:rgba(111,160,240,.04);color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.65 var(--fb);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
 body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(55vmax 55vmax at 92% -8%,rgba(45,212,167,.22),transparent 60%),radial-gradient(45vmax 45vmax at -8% 108%,rgba(123,232,201,.12),transparent 60%)}
@@ -75,6 +75,23 @@ body.m nav{transform:none}body.m #ov{display:block;position:fixed;inset:0;backgr
 @media print{.sec{break-after:page}}
 .p{background:linear-gradient(135deg,var(--ac),#22B8CF);color:#042420;box-shadow:0 10px 24px -12px var(--ac)}
 .card,.kpi{border-radius:22px}.p,.s,.ib,.x,input,select,nav button{border-radius:14px}
+
+/* ===== الشكل المؤسسي ===== */
+header{background:var(--ac)!important;color:#fff!important;border-bottom:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+header .ver,header .chip,header .ib,header .bn,header .bn span,header .chip em,header .chip i{color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+header .chip,header .ib{background:rgba(255,255,255,.12)!important}
+header .chip i{background:rgba(255,255,255,.22)!important}
+body::before,body::after{display:none!important}
+.card,.kpi{border-radius:10px!important;box-shadow:var(--sh)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.kpi.main{background:var(--glass)!important;border-color:var(--line)!important;border-top:3px solid var(--ac)!important}
+.p{background:var(--ac)!important;color:#fff!important;box-shadow:none!important;border-radius:8px!important}
+.p:hover{filter:brightness(1.07)}
+.s,.ib,.x,input,select,nav button{border-radius:8px!important}
+nav button.on{background:var(--acs)!important;color:var(--ac)!important;font-weight:600}
+nav button.on::before{background:var(--ac)!important;box-shadow:none!important}
+h2::before{background:var(--ac)!important;box-shadow:none!important}
+th{background:var(--card2);color:var(--mute);font-weight:600}
+td{border-bottom:1px solid var(--line)}
 </style></head><body>
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -89,7 +106,7 @@ const msg=e=>{const m=String(e&&e.message||e),k=Object.keys(ERR).find(k=>m.inclu
 function toast(m,bad){const d=document.createElement('div');d.className='toast'+(bad?' e':'');d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}
 let me=null,tab='sales',D={items:[],cust:[],wal:[],stock:{},stock2:{}},EDIT=null,LINES=[{}];
 const TY={cash:'نقدي',credit:'آجل',wallet:'محفظة',split:'مجزّأ'};
-const LOGO='<svg viewBox="0 0 64 64"><defs><linearGradient id="lgq" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6C7BFF"/><stop offset="1" stop-color="#8C5CF6"/></linearGradient><linearGradient id="lgh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#lgq)"/><rect width="64" height="64" rx="18" fill="url(#lgh)"/><path d="M21 15v34" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M25 35L40 20" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><path d="M27 32l16 17" stroke="#fff" stroke-width="6.5" stroke-linecap="round" opacity=".93"/><path d="M33 17h11v11" fill="none" stroke="#35D7B1" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LOGO='<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#FFFFFF"/><rect x="14" y="14" width="6" height="36" rx="3" fill="#1F4E9A"/><path d="M22 32 L38 16" stroke="#1F4E9A" stroke-width="6" stroke-linecap="round"/><path d="M24 32 L40 48" stroke="#1F4E9A" stroke-width="6" stroke-linecap="round"/><path d="M41 40 L49 32 L53 36" fill="none" stroke="#17875A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function loginView(err){$('#app').innerHTML=`<div class="lg"><div class="aur"></div><div class="lc"><div class="lm">${LOGO}</div><h1 dir="ltr">Kareem <span style="font-weight:400;color:var(--mute)">Accounting</span></h1><p class="sub">سجّل دخولك لإدارة المبيعات والمخزون والحسابات</p><label>الإيميل<input id="em" type="email" autocomplete="username" dir="ltr"></label><label>كلمة السر<input id="pw" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key=='Enter')signIn()"></label><button class="p" onclick="signIn()">دخول</button>${err?`<p class="bad" style="margin:12px 0 0">${esc(err)}</p>`:''}</div></div>`}
 async function signIn(){const{error}=await SB.auth.signInWithPassword({email:$('#em').value.trim().toLowerCase(),password:$('#pw').value});if(error)return loginView(/invalid login/i.test(error.message)?'الإيميل أو كلمة السر غلط':'خطأ: '+error.message);boot()}
 async function logout(){try{localStorage.removeItem('kd');localStorage.removeItem('kp')}catch(e){}await SB.auth.signOut();location.reload()}
