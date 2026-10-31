@@ -92,6 +92,14 @@ nav button.on::before{background:var(--ac)!important;box-shadow:none!important}
 h2::before{background:var(--ac)!important;box-shadow:none!important}
 th{background:var(--card2);color:var(--mute);font-weight:600}
 td{border-bottom:1px solid var(--line)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 14px}
+.tile{all:unset;box-sizing:border-box;cursor:pointer;background:var(--tc);color:#fff;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh);text-align:right;font-family:var(--fb)}
+.tile:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.tile .tl{font-size:13px;opacity:.92}.tile .tv{font:700 26px var(--fd)}.tile .tgo{font-size:12px;opacity:.85}
+.tile:hover{filter:brightness(1.06)}
+.al{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-top:8px;background:var(--card2);border-inline-start:4px solid var(--mint)}
+.al.bad{border-inline-start-color:var(--bad)}
+.al span{font-size:14px}
 </style></head><body>
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -380,11 +388,36 @@ async function st2Pv(){await need();const rows=D.items.map(x=>[x,s2(x.id)]).filt
 async function homeView(){await need();const t=today(),day=d=>sum(A.inv.filter(i=>i.inv_date==d).map(net)),tv=day(t),yv=day(iso(dd(t)-DAY)),cnt=A.inv.filter(i=>i.inv_date==t).length,c=cashCalc().cash,w=sum(walCalc().map(x=>x.bal)),lw=low(),dl=yv>0?Math.round((tv-yv)/yv*100):null;
 const pts=[];for(let k=13;k>=0;k--){const d=iso(dd(t)-k*DAY);pts.push({d,v:day(d)})}const mx=Math.max(1,...pts.map(p=>p.v)),X=i=>20+i*(560/13),Y=v=>140-(v/mx)*110,L=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
 const chart=`<svg viewBox="0 0 600 172" class="ch" style="direction:ltr" role="img" aria-label="مبيعات آخر 14 يوم"><defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--ac)" stop-opacity=".38"/><stop offset="1" stop-color="var(--ac)" stop-opacity="0"/></linearGradient></defs><path d="${L} L${X(13)} 150 L${X(0)} 150Z" fill="url(#gA)"/><path d="${L}" fill="none" stroke="var(--ac)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${pts.map((p,i)=>`<circle cx="${X(i)}" cy="${Y(p.v)}" r="${i==13?5.5:3}" fill="${i==13?'var(--ac)':'var(--bg)'}" stroke="var(--ac)" stroke-width="2"><title>${p.d}: ${fmt(p.v)}</title></circle>`).join('')}<text x="${X(0)}" y="168" class="ct" text-anchor="start">${pts[0].d.slice(5)}</text><text x="${X(13)}" y="168" class="ct" text-anchor="end">${pts[13].d.slice(5)}</text></svg>`;
+const ym=d=>String(d||'').slice(0,7);
+const now=new Date(),cy=now.getFullYear(),cm=now.getMonth();
+const keyOf=k=>{let m=cm-k,y=cy;while(m<0){m+=12;y--}return y+'-'+String(m+1).padStart(2,'0')};
+const curK=keyOf(0),mk=[];for(let k=11;k>=0;k--)mk.push(keyOf(k));
+const msale=mk.map(k=>sum(A.inv.filter(i=>ym(i.inv_date)==k).map(net))),mret=mk.map(k=>sum(A.rt.filter(r=>ym(r.r_date)==k).map(r=>r.qty*r.price)));
+const mx2=Math.max(1,...msale,...mret);
+const bars=mk.map((k,i)=>{const x=40+i*46,hS=(msale[i]/mx2)*130,hR=(mret[i]/mx2)*130;return `<rect x="${x}" y="${150-hS}" width="16" height="${hS}" rx="3" fill="var(--ac)"><title>${k}: مبيعات ${fmt(msale[i])}</title></rect><rect x="${x+18}" y="${150-hR}" width="16" height="${hR}" rx="3" fill="var(--bad)"><title>${k}: مرتجع ${fmt(mret[i])}</title></rect><text x="${x+17}" y="170" text-anchor="middle" class="ct">${k.slice(5)}</text>`}).join('');
+const msvg=`<svg viewBox="0 0 600 180" class="ch" style="direction:ltr" role="img" aria-label="المبيعات والمرتجعات لآخر 12 شهر">${bars}</svg><p class="note" style="margin:6px 0 0"><span style="color:var(--ac)">■</span> مبيعات &nbsp; <span style="color:var(--bad)">■</span> مرتجعات</p>`;
+const tileCnt=A.inv.filter(i=>ym(i.inv_date)==curK).length,retCnt=A.rt.filter(r=>ym(r.r_date)==curK).length;
+const TILE=(c,l,v,k)=>`<button class="tile" style="--tc:${c}" onclick="go('${k}')"><span class="tl">${l}</span><b class="tv">${v}</b><span class="tgo">عرض ←</span></button>`;
+const tiles=`<div class="tiles">${TILE('#2563EB','العملاء',D.cust.length,'cust')}${TILE('#059669','الأصناف',D.items.length,'items')}${TILE('#D97706','فواتير الشهر',tileCnt,'inv')}${TILE('#7C3AED','مرتجعات الشهر',retCnt,'ret')}</div>`;
 const K=(l,v,s,cls)=>`<div class="kpi ${cls||''}"><span class="kl">${l}</span><b class="kv">${v}</b><span class="ks">${s||'&nbsp;'}</span></div>`;
+const ac2=AC(),mInv=A.inv.filter(i=>ym(i.inv_date)==curK),mRev=sum(mInv.map(net)),mCost=sum(mInv.flatMap(i=>i.invoice_lines.map(l=>n(l.qty)*(ac2[l.item_id]||0)))),mRecv=sum(A.cp.filter(p=>ym(p.pay_date)==curK).map(p=>+p.amount)),mOut=sum(A.sp.filter(p=>ym(p.s_date)==curK).map(p=>+p.amount))+sum(A.ex.filter(e=>ym(e.e_date)==curK).map(e=>+e.amount)),gr=msale[10]>0?Math.round((msale[11]-msale[10])/msale[10]*100):null;
+const mKpis=`<div class="kpis">${K('مبيعات الشهر',fmt(msale[11]),gr===null?'&nbsp;':`<span class="${gr>=0?'up':'dn'}">${gr>=0?'▲':'▼'} ${Math.abs(gr)}% عن الشهر اللي فات</span>`,'main')}${K('مجمل الربح (تقديري)',fmt(mRev-mCost),'قبل خصم المرتجعات')}${K('تحصيل الشهر',fmt(mRecv),'دفعات العملاء المستلمة')}${K('مصروفات ومدفوعات الشهر',fmt(mOut),'مصروفات + سداد موردين')}</div>`;
+const pm={cash:0,credit:0,wallet:0};mInv.forEach(i=>pays(i).forEach(p=>{const k=p.m=='wallet'?'wallet':p.m=='credit'?'credit':'cash';pm[k]+=+p.a||0}));
+const pmTot=pm.cash+pm.credit+pm.wallet||1,CIRC=2*Math.PI*50;let pmOff=0;
+const pmSeg=(v,c)=>{const len=CIRC*v/pmTot;const x=`<circle r="50" cx="70" cy="70" fill="none" stroke="${c}" stroke-width="22" stroke-dasharray="${len} ${CIRC-len}" stroke-dashoffset="${-pmOff}" transform="rotate(-90 70 70)"/>`;pmOff+=len;return x};
+const dnSvg=`<svg viewBox="0 0 140 140" width="150" height="150" role="img" aria-label="طرق الدفع">${pmSeg(pm.cash,'#2563EB')}${pmSeg(pm.credit,'#D97706')}${pmSeg(pm.wallet,'#059669')}<text x="70" y="68" text-anchor="middle" style="font:600 13px var(--fd);fill:var(--tx)">${fmt(mRev)}</text><text x="70" y="84" text-anchor="middle" style="font:12px var(--fb);fill:var(--mute)">إجمالي الشهر</text></svg>`;
+const pmCard=`<div class="card"><b>طرق الدفع (الشهر الحالي)</b><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:8px">${dnSvg}<div style="display:grid;gap:8px"><span><span style="color:#2563EB">■</span> نقدي: <b>${fmt(pm.cash)}</b></span><span><span style="color:#D97706">■</span> آجل: <b>${fmt(pm.credit)}</b></span><span><span style="color:#059669">■</span> محافظ وإنستاباي: <b>${fmt(pm.wallet)}</b></span></div></div></div>`;
+const al=[];
+if(lw.length)al.push(['bad',`${lw.length} صنف تحت حد الطلب`,'stock']);
+const dcq=dueChq();if(dcq)al.push(['bad',`${dcq} شيك مستحق أو قريب الاستحقاق`,'chq']);
+const overC=D.cust.filter(c=>n(c.credit_limit)>0&&custBal(c.id)>n(c.credit_limit)).length;if(overC)al.push(['bad',`${overC} عميل تجاوز حد الائتمان`,'cust']);
+const negI=D.items.filter(x=>n(D.stock[x.id])<0).length;if(negI)al.push(['bad',`${negI} صنف رصيده سالب`,'stock']);
+if(!al.length)al.push(['ok','مفيش تنبيهات دلوقتي، كل حاجة تمام','']);
+const alCard=`<div class="card"><b>⚡ أولويات اليوم</b>${al.map(([t,txt,k])=>`<div class="al ${t}"><span>${txt}</span>${k?`<button class="s" onclick="go('${k}')">عرض</button>`:''}</div>`).join('')}</div>`;
 let dt='';try{dt=new Date().toLocaleDateString('ar-EG-u-nu-latn',{weekday:'long',day:'numeric',month:'long'})}catch(e){}
 return`<div class="hero"><div><h2 class="hh">أهلاً، ${esc(me.name)}</h2><p class="note" style="margin:2px 0 0">${dt}</p></div><div class="qa"><button class="p" onclick="go('sales')">🧾 عملية بيع جديدة</button><button class="s" onclick="go('items')">📦 صنف جديد</button><button class="s" onclick="go('cust')">👤 عميل جديد</button><button class="s" onclick="go('sup')">🚚 مورد جديد</button></div></div>
 <div class="kpis">${K('مبيعات اليوم',fmt(tv),cnt+' فاتورة'+(dl===null?'':` · <span class="${dl>=0?'up':'dn'}">${dl>=0?'▲':'▼'} ${Math.abs(dl)}% عن أمس</span>`),'main')}${K('رصيد الخزنة الرئيسية',fmt(c),'بعد كل الحركات')}${K('خزنة المخزن الثاني',fmt(cashCalc('second').cash),'مبيعاته اليوم: '+fmt(sum(A.inv.filter(i=>i.inv_date==t&&i.warehouse=='second').map(net))))}${K('المحافظ والحسابات',fmt(w),'إنستاباي وشيكات ومحافظ')}${K('أصناف محتاجة طلب',lw.length,lw.length?esc(lw.slice(0,2).map(x=>x.name).join('، ')):'المخزون تمام')}</div>
-${dueChq()?`<div class="card"><b class="bad">⚠️ ${dueChq()} شيك مستحق أو قريب الاستحقاق</b> <button class="s" onclick="go('chq')">عرض الشيكات</button></div>`:''}<div class="two"><div class="card"><b>مبيعات آخر 14 يوم</b> <span class="note">· إجمالي ${fmt(sum(pts.map(p=>p.v)))}</span>${chart}</div><div class="card"><b>محتاج طلب</b>${lw.length?lw.slice(0,7).map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)"><span>${esc(x.name)}</span><b class="${n(D.stock[x.id])<0?'bad':''}">${fmt(D.stock[x.id])}</b></div>`).join(''):'<p class="note">كل الأصناف فوق حد الطلب.</p>'}<button class="s" style="margin-top:10px" onclick="go('stock')">كل المخزون</button></div></div>`}
+${mKpis}${tiles}${dueChq()?`<div class="card"><b class="bad">⚠️ ${dueChq()} شيك مستحق أو قريب الاستحقاق</b> <button class="s" onclick="go('chq')">عرض الشيكات</button></div>`:''}<div class="two">${pmCard}${alCard}</div><div class="card"><b>المبيعات مقابل المرتجعات (آخر 12 شهر)</b>${msvg}</div><div class="two"><div class="card"><b>مبيعات آخر 14 يوم</b> <span class="note">· إجمالي ${fmt(sum(pts.map(p=>p.v)))}</span>${chart}</div><div class="card"><b>محتاج طلب</b>${lw.length?lw.slice(0,7).map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)"><span>${esc(x.name)}</span><b class="${n(D.stock[x.id])<0?'bad':''}">${fmt(D.stock[x.id])}</b></div>`).join(''):'<p class="note">كل الأصناف فوق حد الطلب.</p>'}<button class="s" style="margin-top:10px" onclick="go('stock')">كل المخزون</button></div></div>`}
 /* ----- خصم الفاتورة + الفواتير على الجهاز (بدون نت) ----- */
 const discV=()=>{const e=$('#dv');if(!e)return 0;const v=n(e.value),t=$('#dt');return t&&t.value=='p'?Math.round(sumL()*v)/100:v};
 const netL=()=>Math.max(0,sumL()-discV());
