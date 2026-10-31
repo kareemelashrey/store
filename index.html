@@ -100,6 +100,61 @@ td{border-bottom:1px solid var(--line)}
 .al{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-top:8px;background:var(--card2);border-inline-start:4px solid var(--mint)}
 .al.bad{border-inline-start-color:var(--bad)}
 .al span{font-size:14px}
+
+/* ===== كروت بعمق (تأثير ثلاثي الأبعاد خفيف) ===== */
+.kpi,.card,.tile{transition:transform .22s ease,box-shadow .22s ease}
+.kpi,.card{box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 2px 4px rgba(20,33,61,.06),0 14px 28px -16px rgba(20,33,61,.28)!important}
+[data-theme=dark] .kpi,[data-theme=dark] .card{box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 2px 4px rgba(0,0,0,.35),0 16px 30px -16px rgba(0,0,0,.7)!important}
+.kpi:hover,.card:hover{transform:translateY(-3px);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 6px 10px rgba(20,33,61,.08),0 22px 36px -16px rgba(20,33,61,.34)!important}
+.tile{background:linear-gradient(160deg,var(--tc),color-mix(in srgb,var(--tc) 72%,#000))!important;box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 4px 6px rgba(0,0,0,.08),0 18px 28px -14px var(--tc)!important}
+.tile:hover{transform:translateY(-4px) scale(1.01);filter:none!important;box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 8px 12px rgba(0,0,0,.1),0 26px 34px -14px var(--tc)!important}
+.tile:active{transform:translateY(-1px) scale(.99)}
+.kpi.main{background:linear-gradient(160deg,var(--glass),color-mix(in srgb,var(--ac) 10%,var(--glass)))!important}
+.al{transition:transform .18s ease}
+.al:hover{transform:translateX(-2px)}
+@media (prefers-reduced-motion:reduce){.kpi,.card,.tile,.al{transition:none!important;transform:none!important}}
+
+/* ===== خط أكبر وأعرض ===== */
+body{font-size:16.5px;font-weight:500}
+label{font-size:14.5px;font-weight:600}
+.note{font-size:14px}
+th{font-size:14px;font-weight:700}
+td{font-size:15.5px;font-weight:500}
+b,strong{font-weight:700}
+h2{font-size:21px;font-weight:700}
+nav button{font-size:15.5px;font-weight:600}
+.ng{font-size:13.5px;font-weight:700}
+.kl{font-size:15px;font-weight:600}
+.kv{font-size:31px;font-weight:700}
+.ks{font-size:14px}
+.tile .tl{font-size:15px;font-weight:600}
+.tile .tv{font-size:30px;font-weight:700}
+.tile .tgo{font-size:13.5px;font-weight:600}
+.al span{font-size:15.5px;font-weight:600}
+.p,.s{font-size:15.5px;font-weight:600}
+input,select{font-size:16px}
+.chip{font-size:15px;font-weight:600}
+
+/* ===== ضبط الخط: مريح للقراءة بدون مبالغة ===== */
+body{font-size:16px;font-weight:500}
+label{font-size:14px;font-weight:600}
+.note{font-size:13.5px}
+th{font-size:13.5px;font-weight:700}
+td{font-size:15px;font-weight:500}
+h2{font-size:20px;font-weight:700}
+nav button{font-size:15px;font-weight:600}
+.ng{font-size:13px;font-weight:700}
+.kl{font-size:14px;font-weight:600}
+.kv{font-size:28px;font-weight:700}
+.ks{font-size:13.5px}
+.tile .tl{font-size:14.5px;font-weight:600}
+.tile .tv{font-size:27px;font-weight:700}
+.tile .tgo{font-size:13px;font-weight:600}
+.al span{font-size:15px;font-weight:600}
+.p,.s{font-size:15px;font-weight:600}
+input,select{font-size:15.5px}
+.chip{font-size:14.5px;font-weight:600}
+@media (max-width:560px){body{font-size:15px}.kv{font-size:24px}.tile .tv{font-size:24px}}
 </style></head><body>
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
